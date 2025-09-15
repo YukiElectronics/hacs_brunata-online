@@ -7,6 +7,7 @@ import os
 import re
 import urllib.parse
 from datetime import datetime, timedelta
+import copy
 
 import asyncio
 from socket import gaierror
@@ -273,19 +274,19 @@ class BrunataOnlineApiClient:
         init = {"Meters": {"Day": {}, "Month": {}}}
         if heating_units:
             _LOGGER.debug("🔥 Heating meter(s) found")
-            self._heating.update(init)
+            self._heating.update(copy.deepcopy(init))
             self._heating.update({"Units": heating_units})
         if water_units:
             _LOGGER.debug("💧 Water meter(s) found")
-            self._water.update(init)
+            self._water.update(copy.deepcopy(init))
             self._water.update({"Units": water_units})
         if power_units:
             _LOGGER.debug("⚡ Energy meter(s) found")
-            self._power.update(init)
+            self._power.update(copy.deepcopy(init))
             self._power.update({"Units": power_units})
         if other_units:
             _LOGGER.debug("🔌 Other meter(s) found")
-            self._other.update(init)
+            self._other.update(copy.deepcopy(init))
             self._other.update({"Units": other_units})
 
     async def fetch_consumption(self, _type: Consumption, interval: Interval) -> None:
