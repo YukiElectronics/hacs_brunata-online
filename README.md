@@ -25,6 +25,19 @@ In most cases, you will likely have to add support for alternate portals yoursel
 This integration allows Home Assistant to read meter values from the [Brunata Online][brunata] Portal.
 Brunata is an IoT-enabled utilities provider that's part of the Minol-ZENNER Group, mostly providing utilities to housing cooperatives in the EEA
 
+### Trying it out
+
+[Adjusted instructions based on this GitHub issue comment](https://github.com/YukiElectronics/ha-brunata/issues/13#issuecomment-2258440139)
+and added additional tooling to make it easier to fetch the data.
+
+1. Put your credentials in the file `brunata-secrets.cfg` (create it if it doesn't exist)
+```cfg
+[brunata]
+username = your_username
+password = your_password
+```
+2. Run the script `fetch_brunata_data.py` to see if it works
+
 ### ✨ Planned Features
 
 - [x] Add support for more metrics
