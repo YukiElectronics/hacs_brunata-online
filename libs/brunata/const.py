@@ -33,6 +33,7 @@ class Consumption(Enum):
     HEATING = 1
     WATER = 2
     ELECTRICITY = 3
+    OTHER = 6
 
 
 class Interval(Enum):
