@@ -21,6 +21,7 @@ async def main():
     await brunata_client.fetch_consumption(brunata_api.Consumption.WATER, brunata_api.Interval.MONTH)
     await brunata_client.fetch_consumption(brunata_api.Consumption.ELECTRICITY, brunata_api.Interval.MONTH)
     await brunata_client.fetch_consumption(brunata_api.Consumption.HEATING, brunata_api.Interval.MONTH)
+    await brunata_client.fetch_consumption(brunata_api.Consumption.OTHER, brunata_api.Interval.MONTH)
     json_data = brunata_client.get_consumption()
 
     # format and print the fetched data
