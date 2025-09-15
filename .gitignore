@@ -6,3 +6,4 @@ venv
 .venv
 docs/archives
 docs/json
+brunata-secrets.cfg

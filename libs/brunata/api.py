@@ -7,6 +7,7 @@ import os
 import re
 import urllib.parse
 from datetime import datetime, timedelta
+import copy
 
 import asyncio
 from socket import gaierror
@@ -66,6 +67,7 @@ class BrunataOnlineApiClient:
         self._power = {}
         self._water = {}
         self._heating = {}
+        self._other = {}
         self._tokens = {}
         self._session.headers.update(HEADERS)
 
@@ -250,28 +252,42 @@ class BrunataOnlineApiClient:
         water_units = []
         heating_units = []
         power_units = []
+        other_units = []
         for meter in meters:
-            match meter.get("superAllocationUnit"):
-                case 1:  # Heating
+            # convert meter superAllocationUnit to Consumption enum
+            try:
+                type = Consumption(meter.get("superAllocationUnit"))
+            except ValueError as e:
+                _LOGGER.error("Unknown meter type: %s", e)
+                continue
+
+            match type:
+                case Consumption.HEATING:  # Heating
                     heating_units += meter.get("allocationUnits")
-                case 2:  # Water
+                case Consumption.WATER:  # Water
                     water_units += meter.get("allocationUnits")
-                case 3:  # Electricity
+                case Consumption.ELECTRICITY:  # Electricity
                     power_units += meter.get("allocationUnits")
+                case Consumption.OTHER:  # Other
+                    other_units += meter.get("allocationUnits")
         _LOGGER.info("Meter info: %s", str(meters))
         init = {"Meters": {"Day": {}, "Month": {}}}
         if heating_units:
             _LOGGER.debug("🔥 Heating meter(s) found")
-            self._heating.update(init)
+            self._heating.update(copy.deepcopy(init))
             self._heating.update({"Units": heating_units})
         if water_units:
             _LOGGER.debug("💧 Water meter(s) found")
-            self._water.update(init)
+            self._water.update(copy.deepcopy(init))
             self._water.update({"Units": water_units})
         if power_units:
             _LOGGER.debug("⚡ Energy meter(s) found")
-            self._power.update(init)
+            self._power.update(copy.deepcopy(init))
             self._power.update({"Units": power_units})
+        if other_units:
+            _LOGGER.debug("🔌 Other meter(s) found")
+            self._other.update(copy.deepcopy(init))
+            self._other.update({"Units": other_units})
 
     async def fetch_consumption(self, _type: Consumption, interval: Interval) -> None:
         """Get consumption data for a specific meter type."""
@@ -284,6 +300,8 @@ class BrunataOnlineApiClient:
                 usage = self._water
             case Consumption.HEATING:
                 usage = self._heating
+            case Consumption.OTHER:
+                usage = self._other
         if not usage:
             _LOGGER.debug("No %s meter was found", _type.name.lower())
             return
@@ -334,6 +352,7 @@ class BrunataOnlineApiClient:
             "Heating": self._heating,
             "Water": self._water,
             "Electricity": self._power,
+            "Other": self._other
         }
 
     async def api_wrapper(self, **args) -> ClientResponse:
